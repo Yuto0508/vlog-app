@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
+{{-- layouts/app.blade.phpを親レイアウトとして使う --}}
+@extends('layouts.app')
 
-<head>
-	<meta charset="UTF-8">
-	<title>vlogトップページ</title>
-</head>
+{{-- タイトルを「ホーム」に設定する --}}
+@section('title', 'ホーム')
 
-<body>
-	<h1>ゆーとのvlog</h1>
-	<p>ようこそ！</p>
-</body>
-
-</html>
+{{-- メインコンテンツの開始 --}}
+@section('content')
+<h2>ようこそ！</h2>
+<p>vlogへようこそ！</p>
+@endsection
+{{-- メインコンテンツの終了 --}}
