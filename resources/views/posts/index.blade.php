@@ -14,7 +14,9 @@
 @else
 @foreach($posts as $post)
 <div>
-	<h3>{{ $post->title}}</h3>
+	<h3>
+		<a href="{{ route('posts.show', $post->id)}}">{{$post->title}}></a>
+	</h3>
 	<p>{{ $post->body}}</p>
 	<p>{{ $post->created_at->format('Y/m/d') }}</p>
 </div>
