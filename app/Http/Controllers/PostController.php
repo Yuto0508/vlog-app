@@ -63,7 +63,11 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // IDで投稿を取得する
+        $post = Post::findOrFail($id);
+
+        //post/show.bladephpに投稿データを渡して表示
+        return view('posts.show', compact('post'));
     }
 
     /**
@@ -71,7 +75,11 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        //IDで投稿を取得する
+        $post = Post::findOrFail($id);
+
+        // posts/edit.blade.phpに投稿データを渡して表示
+        return view('posts.edit', compact('post'));
     }
 
     /**
@@ -79,7 +87,23 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // バリデーション（入力値の検証）
+        $request->validate([
+            'title' => 'required|max:255',
+            'body' => 'required',
+        ]);
+
+        // IDで投稿を取得する
+        $post = Post::findOrFail($id);
+
+        //投稿を更新する
+        $post->update([
+            'title' => $request->title,
+            'body' =>  $request->body,
+            'is_public' => $request->has('is_public'),
+        ]);
+        //詳細ページにリダイレクト
+        return redirect()->route('posts.show', $post->id);
     }
 
     /**
@@ -87,6 +111,13 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // IDで投稿を取得する
+        $post = Post::findOrFail($id);
+
+        // 投稿を削除する
+        $post->delete();
+
+        //投稿一覧ページにリダイレクト
+        return redirect()->route('posts.index');
     }
 }
