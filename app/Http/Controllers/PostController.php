@@ -47,8 +47,8 @@ class PostController extends Controller
 
         // 投稿をDBに保存する
         Post::create([
-            // 仮のユーザーID（認証実装後に変更予定）
-            'user_id' => 1,
+            // ログイン中のユーザーIDを取得
+            'user_id' => auth()->id(),
             'title' => $request->title,
             'body' => $request->body,
             'is_public' => $request->has('is_public'),
