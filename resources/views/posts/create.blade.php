@@ -6,7 +6,7 @@
 <h2>投稿作成</h2>
 
 {{--投稿作成フォーム--}}
-<form action="{{ route('posts.store')}}" method="POST">
+<form action="{{ route('posts.store')}}" method="POST" enctype="multipart/form-data">
 
 	@csrf
 
@@ -28,6 +28,12 @@
 			<input type="checkbox" name="is_public" value="1">
 			公開する
 		</label>
+	</div>
+
+	{{-- 画像アップロード欄 --}}
+	<div>
+		<label for="image">画像</label>
+		<input type="file" name="image" id="image" accept="image/*">
 	</div>
 
 	{{-- 送信ボタン --}}
