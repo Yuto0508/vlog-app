@@ -43,7 +43,16 @@ class PostController extends Controller
             'title' => 'required |max:255',
             // 必須
             'body' => 'required',
+            //任意、画像ファイル・2MB以内
+            'image' => 'nullable|image|max:2048',
         ]);
+
+        //画像が送られてきた場合は保存する
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            // storage/app/public/images/に保存
+            $imagePath = $request->file('image')->store('images', 'public');
+        }
 
         // 投稿をDBに保存する
         Post::create([
@@ -51,6 +60,7 @@ class PostController extends Controller
             'user_id' => auth()->id(),
             'title' => $request->title,
             'body' => $request->body,
+            'image_path' => $imagePath,
             'is_public' => $request->has('is_public'),
         ]);
 
