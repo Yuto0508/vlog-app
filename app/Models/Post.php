@@ -12,6 +12,8 @@ class Post extends Model
         'user_id',
         'title',
         'body',
+        //image_pathカラムを新規追加
+        'image_path',
         'is_public',
     ];
 

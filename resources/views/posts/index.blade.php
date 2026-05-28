@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 {{-- layouts/app.blade.phpを親レイアウトとして使う --}}
 @extends('layouts.app')
 {{-- タイトルを「投稿一覧」に設定する --}}
@@ -15,8 +19,14 @@
 @foreach($posts as $post)
 <div>
 	<h3>
-		<a href="{{ route('posts.show', $post->id)}}">{{$post->title}}></a>
+		<a href="{{ route('posts.show', $post->id)}}">{{$post->title}}</a>
 	</h3>
+
+	{{-- 画像がある場合は表示する --}}
+	@if($post->image_path)
+	<img src="{{Storage::url($post->image_path)}}" alt="{{ $post->title }}" width="300">
+	@endif
+
 	<p>{{ $post->body}}</p>
 	<p>{{ $post->created_at->format('Y/m/d') }}</p>
 </div>
