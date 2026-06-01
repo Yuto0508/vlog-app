@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 // Postモデルを読み込む
 use App\Models\Post;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -59,7 +60,7 @@ class PostController extends Controller
         // 投稿をDBに保存する
         Post::create([
             // ログイン中のユーザーIDを取得
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'title' => $request->title,
             'body' => $request->body,
             'image_path' => $imagePath,
