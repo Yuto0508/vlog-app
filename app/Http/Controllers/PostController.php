@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Post; // Postモデルを読み込む
+// Postモデルを読み込む
+use App\Models\Post;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -101,15 +103,29 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|max:255',
             'body' => 'required',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
 
+        // 新しい画像が送られてきた場合は保存する
+        // 既存の画像パスを保持
+        $imagePath = $post->image_path;
+        if ($request->hasFile('image')) {
+            //古い画像を削除する
+            if ($post->image_path) {
+                Storage::disk('public')->delete($post->image_path);
+            }
+            //新しい画像を保存する
+            $imagePath = $request->file('image')->store('images', 'public');
+        }
+
         //投稿を更新する
         $post->update([
             'title' => $request->title,
             'body' =>  $request->body,
+            'image_path' => $imagePath,
             'is_public' => $request->has('is_public'),
         ]);
         //詳細ページにリダイレクト

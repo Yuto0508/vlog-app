@@ -6,7 +6,7 @@
 @section('content')
 <h2>投稿編集</h2>
 {{-- 投稿編集フォーム --}}
-<form action="{{ route('posts.update', $post->id)}}" method="POST">
+<form action="{{ route('posts.update', $post->id)}}" method="POST" enctype="multipart/form-data">
 	{{-- CSRFトークン（セキュリティ対策） --}}
 	@csrf
 	{{-- PUTメソッドを擬似的に送る --}}
@@ -31,6 +31,21 @@
 				{{ $post->is_public ? 'checked' : ''}}>
 			公開する
 		</label>
+	</div>
+
+	@php
+	use Illuminate\Support\Facades\Storage;
+	@endphp
+	@if($post->image_path)
+	<div>
+		<p>現在の画像</p>
+		<img src="{{ Storage::url($post->image_path)}}" alt="{{$post->title}}" width="200">
+	</div>
+	@endif
+
+	<div>
+		<label for="image">画像を変更する場合は選択してください</label>
+		<input type="file" name="image" id="image" accept="image/*">
 	</div>
 
 	{{-- 更新ボタン --}}
