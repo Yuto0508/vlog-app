@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 {{-- layouts/app.blade.phpを親レイアウトとして使う --}}
 @extends('layouts.app')
 
@@ -7,6 +11,12 @@
 {{-- メインコンテンツの開始 --}}
 @section('content')
 <h2>{{ $post->title}}</h2>
+
+{{-- 画像がある場合は表示する --}}
+@if($post->image_path)
+<img src="{{Storage::url($post->image_path)}}" alt="{{$post->title}}" width="300">
+@endif
+
 <p>{{ $post->body}}</p>
 <p>{{ $post->created_at->format('Y/m/d')}}</p>
 
