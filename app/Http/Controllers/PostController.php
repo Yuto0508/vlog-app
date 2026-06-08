@@ -95,10 +95,15 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        //IDで投稿を取得する
+        // IDで投稿を取得する
         $post = Post::findOrFail($id);
 
-        //タグ一覧を取得する(tagsテーブルから全タグを取得)
+        // 自分の投稿以外はリダイレクト
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->route('posts.index');
+        }
+
+        // タグ一覧を取得する(tagsテーブルから全タグを取得)
         $tags = Tag::all();
 
         // posts/edit.blade.phpに投稿データを渡して表示(editビューにpostsとtagsを渡す)
@@ -119,6 +124,10 @@ class PostController extends Controller
 
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
+        // 自分の投稿以外はリダイレクト
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->route('posts.index');
+        }
 
         // 新しい画像が送られてきた場合は保存する
         // 既存の画像パスを保持
@@ -156,6 +165,10 @@ class PostController extends Controller
     {
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
+        // 自分の投稿以外はリダイレクト
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->route('posts.index');
+        }
 
         // 投稿を削除する
         $post->delete();
