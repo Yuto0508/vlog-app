@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Tag;
 
 class PostController extends Controller
 {
@@ -31,8 +32,9 @@ class PostController extends Controller
      */
     public function create()
     {
-        //投稿作成フォームを表示する
-        return view('posts.create');
+        // タグ一覧を取得してViewに渡す
+        $tags = Tag::all();
+        return view('posts.create', compact('tags'));
     }
 
     /**
@@ -57,8 +59,8 @@ class PostController extends Controller
             $imagePath = $request->file('image')->store('images', 'public');
         }
 
-        // 投稿をDBに保存する
-        Post::create([
+        // 投稿をDBに保存する        
+        $post = Post::create([
             // ログイン中のユーザーIDを取得
             'user_id' => Auth::id(),
             'title' => $request->title,
@@ -66,6 +68,11 @@ class PostController extends Controller
             'image_path' => $imagePath,
             'is_public' => $request->has('is_public'),
         ]);
+
+        // タグを紐付ける
+        if ($request->has('tags')) {
+            $post->tags()->attach($request->tags);
+        }
 
         // 投稿一覧ページにリダイレクト
         return redirect()->route('posts.index');
@@ -91,8 +98,11 @@ class PostController extends Controller
         //IDで投稿を取得する
         $post = Post::findOrFail($id);
 
-        // posts/edit.blade.phpに投稿データを渡して表示
-        return view('posts.edit', compact('post'));
+        //タグ一覧を取得する(tagsテーブルから全タグを取得)
+        $tags = Tag::all();
+
+        // posts/edit.blade.phpに投稿データを渡して表示(editビューにpostsとtagsを渡す)
+        return view('posts.edit', compact('post', 'tags'));
     }
 
     /**
@@ -129,6 +139,12 @@ class PostController extends Controller
             'image_path' => $imagePath,
             'is_public' => $request->has('is_public'),
         ]);
+
+        //タグを更新する（既存タグを削除して新しいタグを紐づける）
+        // $request->tagsは [1, 3, 5] のような配列
+        // sync()はこの配列のIDと一致するタグだけを紐付ける
+        $post->tags()->sync($request->tags ?? []);
+
         //詳細ページにリダイレクト
         return redirect()->route('posts.show', $post->id);
     }

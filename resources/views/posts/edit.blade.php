@@ -48,6 +48,19 @@
 		<input type="file" name="image" id="image" accept="image/*">
 	</div>
 
+	{{-- タグ選択欄 --}}
+	<div>
+		<label>タグ</label>
+		@foreach($tags as $tag)
+		<label>
+			<input type="checkbox" name="tags[]" value="{{ $tag->id}}"
+				{{-- この投稿にすでにタグが紐付いていればcheckedをつける --}}
+				{{ $post->tags->contains($tag->id) ? 'checked' : ''}}>
+			{{ $tag->name }}
+		</label>
+		@endforeach
+	</div>
+
 	{{-- 更新ボタン --}}
 	<button type="submit">更新する</button>
 </form>
