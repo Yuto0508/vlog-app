@@ -36,6 +36,16 @@
 		<input type="file" name="image" id="image" accept="image/*">
 	</div>
 
+	<div>
+		<label>タグ</label>
+		@foreach($tags as $tag)
+		<label>
+			<input type="checkbox" name="tags[]" value="{{$tag->id}}">
+			{{ $tag->name}}
+		</label>
+		@endforeach
+	</div>
+
 	{{-- 送信ボタン --}}
 	<button type="submit">投稿する</button>
 </form>
