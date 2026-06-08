@@ -18,6 +18,14 @@ use Illuminate\Support\Facades\Storage;
 @endif
 
 <p>{{ $post->body}}</p>
+{{-- タグの表示 --}}
+@if($post->tags->isNotEmpty())
+<div>
+	@foreach($post->tags as $tag)
+	<span>{{ $tag->name}} </span>
+	@endforeach
+</div>
+@endif
 <p>{{ $post->created_at->format('Y/m/d')}}</p>
 
 {{-- 編集・削除ボタン --}}
