@@ -38,4 +38,7 @@ Route::get('/dashboard', function () {
     return redirect()->route('posts.index');
 })->middleware('auth')->name('dashboard');
 
+// カレンダーページ
+Route::get('/calendar', [App\Http\Controllers\CalendarController::class, 'index'])->name('calendar.index');
+
 require __DIR__ . '/auth.php';
