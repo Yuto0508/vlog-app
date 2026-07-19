@@ -43,9 +43,13 @@ $blankCells = $startOfMonth->dayOfWeek;
 
 @for($day = 1; $day <= $startOfMonth->daysInMonth; $day++)
  @php
-  $date = $startOfMonth->copy()->day($day)->format('Y-m-d');
+  $carbon = $startOfMonth->copy()->day($day);
+  $date = $carbon->format('Y-m-d');
  @endphp
-<td class="border border-gray-300 w-24 h-20 text-center align-top">{{ $day }}
+<td class="border border-gray-300 w-24 h-20 text-center align-top @if($carbon->isToday()) bg-yellow-100 @endif">
+	<span class="@if($carbon->dayOfWeek == 0) text-red-500 @elseif($carbon->dayOfWeek == 6) text-blue-500 @endif">
+		{{ $day }}
+	</span>
 @if($posts->has($date))
  @foreach($posts[$date] as $post)
 <div>
