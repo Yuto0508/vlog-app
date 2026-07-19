@@ -22,34 +22,38 @@
 $blankCells = $startOfMonth->dayOfWeek;
 @endphp
 
-<table>
+<table class="border-collapse">
 <thead>
 	<tr>
-		<th>日</th>
-		<th>月</th>
-		<th>火</th>
-		<th>水</th>
-		<th>木</th>
-		<th>金</th>
-		<th>土</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">日</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">月</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">火</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">水</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">木</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">金</th>
+		<th class="border border-gray-300 w-24 h-20 text-center align-top">土</th>
 	</tr>
 </thead>
 <tbody>
 <tr>
 {{-- 初期化、条件、更新の値 --}}
 @for($WeekDay = 0; $WeekDay < $blankCells; $WeekDay++)
-<td></td>
+<td class="border border-gray-300 w-24 h-20 text-center align-top"></td>
 @endfor
 
 @for($day = 1; $day <= $startOfMonth->daysInMonth; $day++)
  @php
   $date = $startOfMonth->copy()->day($day)->format('Y-m-d');
  @endphp
-<td>{{ $day }}
+<td class="border border-gray-300 w-24 h-20 text-center align-top">{{ $day }}
 @if($posts->has($date))
+ @foreach($posts[$date] as $post)
 <div>
-⚫︎
+	<a href="{{ route('posts.show', $post)}}" class="text-blue-600 hover:underline">
+		{{$post->title}}
+	</a>
 </div>
+ @endforeach
 @endif
 </td>
 @if(($blankCells + $day) % 7 == 0)
@@ -59,16 +63,3 @@ $blankCells = $startOfMonth->dayOfWeek;
 </tr>
 </tbody>
 </table>
-
-<style>
-	table{
-		border-collapse;
-	}
-	th,td{
-		border:1px solid #ccc;
-		width: 100px;
-		height: 80px;
-		text-align: center;
-		vertical-align: top;
-	}
-</style>
