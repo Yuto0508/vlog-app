@@ -67,3 +67,4 @@ $blankCells = $startOfMonth->dayOfWeek;
 </tr>
 </tbody>
 </table>
+@endsection
