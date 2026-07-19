@@ -1,58 +1,143 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# vlog-app
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+日々の記録を投稿・公開できる、個人ブログ（Vlog）Web アプリケーションです。
+Laravel の学習と Web 開発の成果物として、認証・投稿管理・タグ・画像アップロード・
+カレンダー表示までを一通り実装しています。
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 概要
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- ログインしたユーザーが記事を作成・編集・削除できるブログアプリ
+- 記事にはタイトル・本文・画像・タグ・公開/非公開を設定できる
+- 記事の一覧・詳細・カレンダーは**ログインなし（ゲスト）でも閲覧できる**公開ブログ構成
+- 月間カレンダーから、その日に投稿された公開記事へたどれる
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+「書く人（自分）はログインして投稿し、読む人（ネットの訪問者）はログインなしで閲覧する」
+という、公開ブログとして自然な権限設計にしています。
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 背景・目的
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Web アプリケーション開発を学ぶための成果物として制作しました。単なるチュートリアルの
+写経ではなく、以下を意識して段階的に機能を積み上げています。
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- **フレームワークの基本を体で覚える** — ルーティング、コントローラ、Eloquent ORM、
+  Blade テンプレート、マイグレーション、リレーション（1対多・多対多）
+- **実運用で必要になる要素を一通り触る** — 認証、認可（ログイン必須の出し分け）、
+  ファイルアップロード、公開/非公開の制御、タイムゾーン対応
+- **チーム開発を想定したブランチ運用** — `feature/*` → `develop` → `master` の
+  git-flow スタイルで、機能ごとにブランチを切って開発
 
-## Agentic Development
+各機能の実装過程や学びは `docs/learning-log/` に学習ログとして残しています。
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 使用技術
 
-php artisan boost:install
+### バックエンド
+| 技術 | バージョン | 用途 |
+|---|---|---|
+| PHP | 8.3+ | 言語 |
+| Laravel | 13.x | Web アプリケーションフレームワーク |
+| Laravel Breeze | 2.x | 認証スキャフォールディング（ログイン/登録/プロフィール） |
+| SQLite | - | データベース（デフォルト） |
+| Eloquent ORM | - | データベース操作・リレーション |
+
+### フロントエンド
+| 技術 | バージョン | 用途 |
+|---|---|---|
+| Blade | - | サーバーサイドテンプレート |
+| Tailwind CSS | 3.x | スタイリング（ユーティリティファースト） |
+| Alpine.js | 3.x | 軽量な UI インタラクション（メニュー開閉など） |
+| Vite | 8.x | アセットのビルド・開発サーバー |
+
+### 開発・品質
+| 技術 | 用途 |
+|---|---|
+| Pest | テストフレームワーク |
+| Laravel Pint | コードフォーマッタ |
+| Laravel Pail | ログ閲覧 |
+| Tinker / Faker | 対話実行・ダミーデータ生成 |
+
+---
+
+## 主な機能
+
+- **認証**（Laravel Breeze）：ユーザー登録・ログイン・プロフィール編集
+- **投稿管理（CRUD）**：記事の作成・一覧・詳細・編集・削除
+  - タイトル・本文・画像・公開フラグ（`is_public`）を設定可能
+  - 作成・編集・削除はログイン必須、一覧・詳細は誰でも閲覧可能
+- **画像アップロード**：記事にサムネイル画像を添付（`image_path`）
+- **タグ機能**：記事に複数タグを付与（投稿とタグの多対多）
+- **カレンダー**：月間カレンダーに公開記事を表示
+  - 前月・次月へ移動
+  - 記事がある日に記事タイトルをリンク表示
+  - 曜日の色分け（日曜=赤／土曜=青）・今日のハイライト
+  - タイムゾーンは `Asia/Tokyo`（日付判定のズレ対策）
+
+---
+
+## データモデル
+
+```
+User 1 ──< Post >── Tag （多対多：post_tag 中間テーブル）
+         (1対多)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- **User** … ユーザー。複数の Post を持つ
+- **Post** … 記事。`user_id` / `title` / `body` / `image_path` / `is_public`。
+  User に属し（多対一）、複数の Tag を持つ（多対多）
+- **Tag** … タグ。複数の Post に紐づく（多対多）
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## セットアップ
 
-## Code of Conduct
+前提：PHP 8.3+ / Composer / Node.js
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+# 1. 依存パッケージのインストール
+composer install
+npm install
 
-## Security Vulnerabilities
+# 2. 環境設定
+cp .env.example .env
+php artisan key:generate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 3. データベース（SQLite）の初期化
+touch database/database.sqlite   # 未作成の場合
+php artisan migrate
 
-## License
+# 4. 開発サーバーの起動（別ターミナルで）
+npm run dev          # Vite（アセットのビルド／HMR）
+php artisan serve    # アプリケーションサーバー（http://localhost:8000）
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+> **Note:** Tailwind のクラスを新しく追加したときは `npm run dev`（Vite）を
+> 起動しておくこと。使われているクラスだけ CSS に書き出されるため、
+> dev 未起動＋古いビルドのままだと新しいクラスが効かない。
+
+---
+
+## ブランチ運用
+
+git-flow スタイルで開発しています。
+
+- `master` … リリース用の安定ブランチ
+- `develop` … 開発の集約先
+- `feature/*` … 機能ごとの開発ブランチ
+
+新しい機能は `develop` から `feature/xxx` を切って開発し、
+**PR は `develop` に向けて**作成します（`master` はリリース時にまとめて更新）。
+
+---
+
+## ディレクトリメモ
+
+- `app/Http/Controllers/` … `PostController` / `CalendarController` / `ProfileController` など
+- `app/Models/` … `User` / `Post` / `Tag`
+- `resources/views/` … Blade テンプレート（`layouts/`・`posts/`・`calendar/` など）
+- `database/migrations/` … テーブル定義
+- `docs/learning-log/` … 実装の学習ログ（Git 管理外）
