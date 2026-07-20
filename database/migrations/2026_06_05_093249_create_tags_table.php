@@ -5,10 +5,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 // Blueprintクラスを読み込む（テーブルのカラム定義に使う）
 use Illuminate\Support\Facades\Schema;
+
 // Schemaクラスを読み込む（テーブルの作成・削除に使う）
 
 return new class extends Migration
-// 無名クラスでMigrationを継承して返す
+    // 無名クラスでMigrationを継承して返す
 {
     /**
      * Run the migrations.

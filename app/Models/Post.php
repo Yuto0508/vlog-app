@@ -4,17 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Tag;
-
 class Post extends Model
 {
-    //入力を許可するカラムを指定（Mass Assignment（一括代入）対策）
+    // 入力を許可するカラムを指定（Mass Assignment（一括代入）対策）
     protected $fillable = [
         // この4つだけ外から値を入れられる
         'user_id',
         'title',
         'body',
-        //image_pathカラムを新規追加
+        // image_pathカラムを新規追加
         'image_path',
         'is_public',
     ];
