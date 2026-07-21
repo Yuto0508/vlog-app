@@ -1,11 +1,13 @@
 <?php
 
 // ルーティングの読み込み
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CalendarController;
 // HomeControllerの読み込み
 use App\Http\Controllers\HomeController;
 // PostControllerの読み込み
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 
 // トップページ（/）にアクセスしたらwelcomeビューを表示する
 Route::get('/', function () {
@@ -28,9 +30,9 @@ Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show')
 
 // プロフィール編集
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // ログイン後のダッシュボード
@@ -39,6 +41,6 @@ Route::get('/dashboard', function () {
 })->middleware('auth')->name('dashboard');
 
 // カレンダーページ
-Route::get('/calendar', [App\Http\Controllers\CalendarController::class, 'index'])->name('calendar.index');
+Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-// Postモデルを読み込む
 use App\Models\Post;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
+// Postモデルを読み込む
 use App\Models\Tag;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -34,6 +34,7 @@ class PostController extends Controller
     {
         // タグ一覧を取得してViewに渡す
         $tags = Tag::all();
+
         return view('posts.create', compact('tags'));
     }
 
@@ -48,18 +49,18 @@ class PostController extends Controller
             'title' => 'required |max:255',
             // 必須
             'body' => 'required',
-            //任意、画像ファイル・2MB以内
+            // 任意、画像ファイル・2MB以内
             'image' => 'nullable|image|max:2048',
         ]);
 
-        //画像が送られてきた場合は保存する
+        // 画像が送られてきた場合は保存する
         $imagePath = null;
         if ($request->hasFile('image')) {
             // storage/app/public/images/に保存
             $imagePath = $request->file('image')->store('images', 'public');
         }
 
-        // 投稿をDBに保存する        
+        // 投稿をDBに保存する
         $post = Post::create([
             // ログイン中のユーザーIDを取得
             'user_id' => Auth::id(),
@@ -86,7 +87,7 @@ class PostController extends Controller
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
 
-        //post/show.bladephpに投稿データを渡して表示
+        // post/show.bladephpに投稿データを渡して表示
         return view('posts.show', compact('post'));
     }
 
@@ -133,28 +134,28 @@ class PostController extends Controller
         // 既存の画像パスを保持
         $imagePath = $post->image_path;
         if ($request->hasFile('image')) {
-            //古い画像を削除する
+            // 古い画像を削除する
             if ($post->image_path) {
                 Storage::disk('public')->delete($post->image_path);
             }
-            //新しい画像を保存する
+            // 新しい画像を保存する
             $imagePath = $request->file('image')->store('images', 'public');
         }
 
-        //投稿を更新する
+        // 投稿を更新する
         $post->update([
             'title' => $request->title,
-            'body' =>  $request->body,
+            'body' => $request->body,
             'image_path' => $imagePath,
             'is_public' => $request->has('is_public'),
         ]);
 
-        //タグを更新する（既存タグを削除して新しいタグを紐づける）
+        // タグを更新する（既存タグを削除して新しいタグを紐づける）
         // $request->tagsは [1, 3, 5] のような配列
         // sync()はこの配列のIDと一致するタグだけを紐付ける
         $post->tags()->sync($request->tags ?? []);
 
-        //詳細ページにリダイレクト
+        // 詳細ページにリダイレクト
         return redirect()->route('posts.show', $post->id);
     }
 
@@ -173,7 +174,7 @@ class PostController extends Controller
         // 投稿を削除する
         $post->delete();
 
-        //投稿一覧ページにリダイレクト
+        // 投稿一覧ページにリダイレクト
         return redirect()->route('posts.index');
     }
 }
