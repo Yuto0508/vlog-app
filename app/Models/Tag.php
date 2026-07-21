@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model
 {
-    //入力を許可するカラムを指定
+    // 入力を許可するカラムを指定
     protected $fillable = ['name'];
 
-    //タグは複数の投稿に属している(多対多の関係)
+    // タグは複数の投稿に属している(多対多の関係)
     public function posts()
     {
         return $this->belongsToMany(Post::class);

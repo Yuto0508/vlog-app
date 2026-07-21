@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            //image_pathカラムを削除
+            // image_pathカラムを削除
             $table->dropColumn('image_path');
         });
     }
