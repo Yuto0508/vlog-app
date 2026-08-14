@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    use HasFactory;
+
     // 入力を許可するカラムを指定（Mass Assignment（一括代入）対策）
     protected $fillable = [
         // この4つだけ外から値を入れられる

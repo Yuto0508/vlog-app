@@ -12,8 +12,8 @@ Route::get('/user', function (Request $request) {
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
 
-// 作成・更新・削除はログイン（トークン）が必要
-Route::middleware('auth:sanctum')->group(function(){
+// 作成・更新・削除は管理者(トークン認証済み)のみ
+Route::middleware(['auth:sanctum', 'admin'])->group(function(){
     Route::post('/posts',[PostController::class, 'store']);
     Route::put('/posts/{post}',[PostController::class,'update']);
     Route::delete('/posts/{post}',[PostController::class,'destroy']);
