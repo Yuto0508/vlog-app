@@ -20,8 +20,8 @@ Route::get('/home', [HomeController::class, 'index']);
 // 投稿一覧は誰でも見られる
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
-// 投稿の作成・編集・削除はログイン済みユーザーのみ（ワイルドカードより前に定義）
-Route::middleware('auth')->group(function () {
+// 投稿の作成・編集・削除は管理者のみ（ワイルドカードより前に定義）
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('posts', PostController::class)->except(['index', 'show']);
 });
 

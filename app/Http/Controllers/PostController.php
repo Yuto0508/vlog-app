@@ -87,6 +87,11 @@ class PostController extends Controller
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
 
+        // 非公開投稿は投稿者本人以外は閲覧不可
+        if (! $post->is_public && Auth::id() !== $post->user_id) {
+            abort(404);
+        }
+
         // post/show.bladephpに投稿データを渡して表示
         return view('posts.show', compact('post'));
     }
@@ -98,11 +103,6 @@ class PostController extends Controller
     {
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
-
-        // 自分の投稿以外はリダイレクト
-        if (Auth::id() !== $post->user_id) {
-            return redirect()->route('posts.index');
-        }
 
         // タグ一覧を取得する(tagsテーブルから全タグを取得)
         $tags = Tag::all();
@@ -125,10 +125,6 @@ class PostController extends Controller
 
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
-        // 自分の投稿以外はリダイレクト
-        if (Auth::id() !== $post->user_id) {
-            return redirect()->route('posts.index');
-        }
 
         // 新しい画像が送られてきた場合は保存する
         // 既存の画像パスを保持
@@ -166,10 +162,6 @@ class PostController extends Controller
     {
         // IDで投稿を取得する
         $post = Post::findOrFail($id);
-        // 自分の投稿以外はリダイレクト
-        if (Auth::id() !== $post->user_id) {
-            return redirect()->route('posts.index');
-        }
 
         // 投稿を削除する
         $post->delete();
