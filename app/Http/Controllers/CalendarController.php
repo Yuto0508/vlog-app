@@ -10,9 +10,13 @@ class CalendarController extends Controller
 {
     public function index(Request $request)
     {
-        // 表示する年月を取得（未指定の場合は今月）
-        $year = $request->get('year', Carbon::now()->year);
-        $month = $request->get('month', Carbon::now()->month);
+        // 表示する年月を取得・検証する（未指定または不正値の場合は今月）
+        $request->validate([
+            'year' => 'nullable|integer|min:1900|max:2200',
+            'month' => 'nullable|integer|min:1|max:12',
+        ]);
+        $year = $request->integer('year', Carbon::now()->year);
+        $month = $request->integer('month', Carbon::now()->month);
 
         // 月の最初と最後の日を取得
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();

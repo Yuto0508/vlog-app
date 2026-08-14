@@ -39,8 +39,15 @@ class PostController extends Controller
     /**
      * 投稿の詳細を返す
      */
-    public function show(Post $post)
+    public function show(Request $request, Post $post)
     {
+        // 非公開投稿は投稿者本人以外は閲覧不可
+        // このルートには auth:sanctum ミドルウェアがかからないため、
+        // デフォルトガード(web)ではなく明示的に sanctum ガードでユーザーを解決する
+        if (! $post->is_public && $request->user('sanctum')?->id !== $post->user_id) {
+            abort(404);
+        }
+
         return response()->json($post);
     }
 
