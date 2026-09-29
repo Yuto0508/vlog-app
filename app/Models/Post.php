@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -19,6 +20,16 @@ class Post extends Model
         'image_path',
         'is_public',
     ];
+
+    protected static function booted(): void
+    {
+        // 投稿を削除するときは、紐づく画像ファイルも削除する（Web・APIどちらの削除でも共通）
+        static::deleting(function (Post $post) {
+            if ($post->image_path) {
+                Storage::disk('public')->delete($post->image_path);
+            }
+        });
+    }
 
     // postsテーブルはusersテーブルに属している（多対一）
     public function user()
