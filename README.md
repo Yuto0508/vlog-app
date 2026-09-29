@@ -128,12 +128,14 @@ php artisan serve    # アプリケーションサーバー（http://localhost:8
 一般ユーザーは閲覧のみで、書き込み系のルートは 403 になります。
 管理者は自分以外が書いた投稿も編集・削除できます。
 
-管理者の付与は Tinker で行います。
+管理者にしたいユーザーは、先に会員登録（`/register`）してから、次のコマンドで昇格させます。
 
 ```bash
-php artisan tinker
->>> App\Models\User::where('email', 'you@example.com')->update(['is_admin' => true]);
+php artisan user:make-admin you@example.com
 ```
+
+メールアドレスのユーザーが見つからない場合はエラーになります。
+`is_admin` は会員登録やプロフィール編集のフォームからは変更できません（一括代入の対象外）。
 
 ### API（Laravel Sanctum）
 | メソッド | パス | 認可 |
