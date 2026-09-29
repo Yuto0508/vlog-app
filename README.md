@@ -181,6 +181,91 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 
 確認には `php artisan about` で `Environment` と `Debug Mode` を見ます。
 
+### 共有レンタルサーバーへのデプロイ
+
+管理画面の名前や細かい設定はサービスごとに違うため、共通する手順だけを書きます。
+
+**契約前の条件**
+- PHP 8.3 以上が使える
+- SSH で接続できる（`migrate` や `user:make-admin` の実行に必要）
+- 拡張機能: `pdo_sqlite` / `mbstring` / `openssl` / `fileinfo` / `tokenizer` / `xml` / `ctype`
+
+**1. 手元でアセットをビルドする**
+
+サーバーに Node が無いことが多いため、手元でビルドします。`public/build` は Git に入らないので、サーバーへ別にアップロードします。
+
+```bash
+npm ci && npm run build
+```
+
+**2. ファイルを置く**
+
+公開してよいのは `public/` の中身だけです。プロジェクト全体は、公開ディレクトリの**外**に置きます。
+
+```
+/home/あなた/vlog-app/        ← プロジェクト全体（外から見えない場所）
+/home/あなた/public_html/     ← 公開ディレクトリ（vlog-app/public を指すようにする）
+```
+
+公開ディレクトリを `vlog-app/public` に向けられない場合は、`public/` の中身を公開ディレクトリに置き、
+`index.php` 内の `vendor` と `bootstrap` へのパスを書き換えます。
+
+**3. サーバー上で設定する（SSH）**
+
+```bash
+cd ~/vlog-app
+composer install --no-dev --optimize-autoloader
+cp .env.production.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --force
+ln -s ../storage/app/public public/storage
+chmod -R 775 storage bootstrap/cache database
+php artisan config:cache && php artisan route:cache && php artisan view:cache
+```
+
+`.env` は次の値を書き換えます。
+- `APP_URL=https://あなたのドメイン`
+- メールの SMTP（サーバーが案内する値）
+- `QUEUE_CONNECTION=sync`（共有サーバーではキューの処理役を常駐させられない。`database` のままだとジョブが実行されない）
+
+**4. HTTPS を有効にする**
+
+管理画面でドメインの無料 SSL 証明書を有効にし、`http://` から `https://` への転送を設定します
+（管理画面の設定、または `public/.htaccess` に転送ルールを追加）。
+
+**5. 管理者を作る**
+
+先にサイトから会員登録してから、次を実行します。
+
+```bash
+php artisan user:make-admin you@example.com
+```
+
+**6. 公開後の確認（セキュリティ）**
+
+外から見えてはいけないファイルが見えていないかを確認します。すべて 404 か 403 になれば合格です。
+`200` が返ったものは公開ディレクトリの設定が間違っているので、すぐに直してください。
+
+```bash
+curl -I https://あなたのドメイン/.env
+curl -I https://あなたのドメイン/database/database.sqlite
+curl -I https://あなたのドメイン/storage/logs/laravel.log
+curl -I https://あなたのドメイン/vendor/autoload.php
+```
+
+そのうえで、`php artisan about` で `Environment: production` / `Debug Mode: OFF` を確認し、
+ブラウザの DevTools で Cookie に `Secure` が付いていることを確認します。
+
+**運用**
+- バックアップ: `database/database.sqlite` と `storage/app/public/images/` を定期的にダウンロードする
+- 更新時:
+  ```bash
+  composer install --no-dev --optimize-autoloader
+  php artisan migrate --force
+  php artisan config:cache && php artisan route:cache && php artisan view:cache
+  ```
+
 ---
 
 ## テストと CI
