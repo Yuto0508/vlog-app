@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Post;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -82,4 +85,43 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+test('deleting an account also deletes the image files of its posts', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $ownPaths = [
+        UploadedFile::fake()->create('a.jpg', 100, 'image/jpeg')->store('images', 'public'),
+        UploadedFile::fake()->create('b.jpg', 100, 'image/jpeg')->store('images', 'public'),
+    ];
+    foreach ($ownPaths as $path) {
+        Post::factory()->create(['user_id' => $user->id, 'image_path' => $path]);
+    }
+    $otherPath = UploadedFile::fake()->create('c.jpg', 100, 'image/jpeg')->store('images', 'public');
+    $otherPost = Post::factory()->create(['user_id' => $otherUser->id, 'image_path' => $otherPath]);
+
+    $this->actingAs($user)->delete('/profile', ['password' => 'password'])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/');
+
+    $this->assertNull($user->fresh());
+    $this->assertDatabaseMissing('posts', ['user_id' => $user->id]);
+    foreach ($ownPaths as $path) {
+        Storage::disk('public')->assertMissing($path);
+    }
+
+    // 他のユーザーの投稿と画像は残る
+    $this->assertModelExists($otherPost);
+    Storage::disk('public')->assertExists($otherPath);
+});
+
+test('deleting an account without posts still works', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->delete('/profile', ['password' => 'password'])
+        ->assertRedirect('/');
+
+    $this->assertNull($user->fresh());
 });
