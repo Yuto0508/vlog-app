@@ -51,6 +51,9 @@ class PostController extends Controller
             'body' => 'required',
             // 任意、画像ファイル・2MB以内
             'image' => 'nullable|image|max:2048',
+            // 任意、存在するタグIDの配列
+            'tags' => 'nullable|array',
+            'tags.*' => 'integer|exists:tags,id',
         ]);
 
         // 画像が送られてきた場合は保存する
@@ -121,6 +124,8 @@ class PostController extends Controller
             'title' => 'required|max:255',
             'body' => 'required',
             'image' => 'nullable|image|max:2048',
+            'tags' => 'nullable|array',
+            'tags.*' => 'integer|exists:tags,id',
         ]);
 
         // IDで投稿を取得する
