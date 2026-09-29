@@ -19,6 +19,15 @@ class User extends Authenticatable
     use HasApiTokens,HasFactory, Notifiable;
 
 
+    protected static function booted(): void
+    {
+        // ユーザーを削除するときは、投稿を1件ずつ削除して画像ファイルも消す
+        // （DBの外部キー(cascade)だけだとモデルの削除処理を通らず、画像が残る）
+        static::deleting(function (User $user) {
+            $user->posts->each->delete();
+        });
+    }
+
     /**
      * このユーザーが投稿した記事
      */
