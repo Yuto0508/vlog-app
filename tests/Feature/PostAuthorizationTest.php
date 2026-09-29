@@ -117,3 +117,34 @@ test('api: admin can update and delete a post authored by another user', functio
     $this->deleteJson("/api/posts/{$post->id}")->assertNoContent();
     $this->assertModelMissing($post);
 });
+
+// --- 詳細ページの編集・削除ボタン(管理者のみ表示) ---
+
+test('admin sees the edit and delete controls on a post page', function () {
+    $post = Post::factory()->create();
+
+    $this->actingAs(User::factory()->admin()->create())
+        ->get(route('posts.show', $post))
+        ->assertOk()
+        ->assertSee(route('posts.edit', $post))
+        ->assertSee('value="DELETE"', false);
+});
+
+test('non-admin users do not see the edit and delete controls', function () {
+    $post = Post::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('posts.show', $post))
+        ->assertOk()
+        ->assertDontSee(route('posts.edit', $post))
+        ->assertDontSee('value="DELETE"', false);
+});
+
+test('guests do not see the edit and delete controls', function () {
+    $post = Post::factory()->create();
+
+    $this->get(route('posts.show', $post))
+        ->assertOk()
+        ->assertDontSee(route('posts.edit', $post))
+        ->assertDontSee('value="DELETE"', false);
+});
