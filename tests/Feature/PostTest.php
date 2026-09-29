@@ -188,3 +188,43 @@ test('admin can delete a post even if authored by another user', function () {
     $response->assertRedirect(route('posts.index'));
     $this->assertModelMissing($post);
 });
+
+test('creating a post with a nonexistent tag id fails validation', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)->post(route('posts.store'), [
+        'title' => 'タグ検証',
+        'body' => '本文',
+        'tags' => [999999],
+    ])->assertSessionHasErrors('tags.0');
+
+    $this->assertDatabaseMissing('posts', ['title' => 'タグ検証']);
+});
+
+test('creating a post with a non-array tags value fails validation', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)->post(route('posts.store'), [
+        'title' => 'タグ検証',
+        'body' => '本文',
+        'tags' => 'abc',
+    ])->assertSessionHasErrors('tags');
+
+    $this->assertDatabaseMissing('posts', ['title' => 'タグ検証']);
+});
+
+test('updating a post with an invalid tag id fails validation and keeps the current tags', function () {
+    $admin = User::factory()->admin()->create();
+    $post = Post::factory()->create();
+    $tag = Tag::factory()->create();
+    $post->tags()->attach($tag);
+
+    $this->actingAs($admin)->put(route('posts.update', $post), [
+        'title' => '更新後',
+        'body' => '更新後の本文',
+        'tags' => [999999],
+    ])->assertSessionHasErrors('tags.0');
+
+    expect($post->refresh()->title)->not->toBe('更新後');
+    expect($post->tags->pluck('id')->all())->toBe([$tag->id]);
+});
