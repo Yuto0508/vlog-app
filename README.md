@@ -158,6 +158,29 @@ curl -H "Authorization: Bearer <token>" -H "Accept: application/json" http://loc
 
 ---
 
+## 本番デプロイの設定
+
+本番用の `.env` の雛形は `.env.production.example` です。サーバー上でコピーして値を埋めます。
+
+```bash
+cp .env.production.example .env
+php artisan key:generate
+php artisan migrate --force
+php artisan storage:link
+npm ci && npm run build
+php artisan config:cache && php artisan route:cache && php artisan view:cache
+```
+
+- `APP_ENV=production` / `APP_DEBUG=false`（エラー画面に内部情報を出さない）
+- `APP_URL` は `https://` で始める。本番では生成される URL も自動で https になる
+- `SESSION_ENCRYPT=true`（セッションを暗号化）/ `SESSION_SECURE_COOKIE=true`（HTTPS でのみ Cookie を送る）
+- メールは `log` ではなく実際の SMTP を設定する（パスワードリセットのメールが送られる）
+- HTTP から HTTPS への転送は、Web サーバーまたはホスティング側で設定する
+
+確認には `php artisan about` で `Environment` と `Debug Mode` を見ます。
+
+---
+
 ## テストと CI
 
 ```bash
