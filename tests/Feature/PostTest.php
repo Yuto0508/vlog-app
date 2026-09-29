@@ -5,6 +5,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 
 test('dashboard redirects to the posts index', function () {
     $user = User::factory()->create();
@@ -227,4 +228,50 @@ test('updating a post with an invalid tag id fails validation and keeps the curr
 
     expect($post->refresh()->title)->not->toBe('更新後');
     expect($post->tags->pluck('id')->all())->toBe([$tag->id]);
+});
+
+test('deleting a post also deletes its image file', function () {
+    Storage::fake('public');
+    $admin = User::factory()->admin()->create();
+    $path = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg')->store('images', 'public');
+    $post = Post::factory()->create(['image_path' => $path]);
+    Storage::disk('public')->assertExists($path);
+
+    $this->actingAs($admin)->delete(route('posts.destroy', $post))
+        ->assertRedirect(route('posts.index'));
+
+    $this->assertModelMissing($post);
+    Storage::disk('public')->assertMissing($path);
+});
+
+test('deleting a post through the api also deletes its image file', function () {
+    Storage::fake('public');
+    $path = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg')->store('images', 'public');
+    $post = Post::factory()->create(['image_path' => $path]);
+    Sanctum::actingAs(User::factory()->admin()->create());
+
+    $this->deleteJson("/api/posts/{$post->id}")->assertNoContent();
+
+    Storage::disk('public')->assertMissing($path);
+});
+
+test('deleting a post without an image works', function () {
+    $admin = User::factory()->admin()->create();
+    $post = Post::factory()->create(['image_path' => null]);
+
+    $this->actingAs($admin)->delete(route('posts.destroy', $post))
+        ->assertRedirect(route('posts.index'));
+
+    $this->assertModelMissing($post);
+});
+
+test('a failed delete by a non-admin keeps the image file', function () {
+    Storage::fake('public');
+    $path = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg')->store('images', 'public');
+    $post = Post::factory()->create(['image_path' => $path]);
+
+    $this->actingAs(User::factory()->create())->delete(route('posts.destroy', $post))
+        ->assertForbidden();
+
+    Storage::disk('public')->assertExists($path);
 });
