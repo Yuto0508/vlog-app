@@ -121,6 +121,55 @@ php artisan serve    # アプリケーションサーバー（http://localhost:8
 
 ---
 
+## 管理者と API
+
+### 管理者
+投稿の**作成・編集・削除は管理者（`users.is_admin = true`）のみ**が行えます。
+一般ユーザーは閲覧のみで、書き込み系のルートは 403 になります。
+管理者は自分以外が書いた投稿も編集・削除できます。
+
+管理者の付与は Tinker で行います。
+
+```bash
+php artisan tinker
+>>> App\Models\User::where('email', 'you@example.com')->update(['is_admin' => true]);
+```
+
+### API（Laravel Sanctum）
+| メソッド | パス | 認可 |
+|---|---|---|
+| GET | `/api/posts` | 誰でも（公開投稿のみ） |
+| GET | `/api/posts/{id}` | 誰でも（非公開は投稿者本人のみ、それ以外は 404） |
+| POST | `/api/posts` | 管理者（トークン必須） |
+| PUT | `/api/posts/{id}` | 管理者（トークン必須） |
+| DELETE | `/api/posts/{id}` | 管理者（トークン必須） |
+| GET | `/api/user` | ログイン済み（トークン必須） |
+
+トークンは Tinker で発行し、`Authorization: Bearer <token>` ヘッダで送ります。
+
+```bash
+php artisan tinker
+>>> App\Models\User::where('email', 'you@example.com')->first()->createToken('cli')->plainTextToken;
+```
+
+```bash
+curl -H "Authorization: Bearer <token>" -H "Accept: application/json" http://localhost:8000/api/user
+```
+
+---
+
+## テストと CI
+
+```bash
+php artisan test
+```
+
+認可（IDOR）のテストは `tests/Feature/PostAuthorizationTest.php` にあります。
+`master` / `develop` への push と PR で、GitHub Actions（`.github/workflows/tests.yml`）が
+アセットをビルドしてテストを自動実行します。
+
+---
+
 ## ブランチ運用
 
 git-flow スタイルで開発しています。
