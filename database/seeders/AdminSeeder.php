@@ -8,7 +8,11 @@ use Illuminate\Database\Seeder;
 class AdminSeeder extends Seeder
 {
     /**
-     * 環境変数（ADMIN_EMAIL / ADMIN_PASSWORD）が設定されていれば、管理者を作成または更新する。
+     * 環境変数（ADMIN_EMAIL / ADMIN_PASSWORD）が設定されていれば、管理者を用意する。
+     *
+     * - ユーザーがいなければ、環境変数の値で作成する
+     * - すでにいる場合は、管理者権限を付けるだけ（名前やパスワードは上書きしない。
+     *   データが残る環境で、アプリ内で変えたパスワードが再起動で戻らないようにするため）
      */
     public function run(): void
     {
@@ -20,9 +24,13 @@ class AdminSeeder extends Seeder
         }
 
         $user = User::firstOrNew(['email' => $email]);
-        $user->name = config('admin.name');
-        $user->password = $password;
-        $user->email_verified_at ??= now();
+
+        if (! $user->exists) {
+            $user->name = config('admin.name');
+            $user->password = $password;
+            $user->email_verified_at = now();
+        }
+
         // is_admin は一括代入の対象外なので、直接代入する
         $user->is_admin = true;
         $user->save();
