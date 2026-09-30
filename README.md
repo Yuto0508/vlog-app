@@ -266,6 +266,42 @@ curl -I https://あなたのドメイン/vendor/autoload.php
   php artisan config:cache && php artisan route:cache && php artisan view:cache
   ```
 
+### Render へのデプロイ（無料プラン）
+
+`Dockerfile` と `docker/` が用意してあります。Render の Web Service（Runtime: Docker）として動かせます。
+
+> **無料プランの制限:** ファイルが再デプロイ・再起動（15 分アクセスがないと停止）のたびに消えるため、
+> **投稿・ユーザー・画像はそのたびに消えます**（SQLite とアップロード画像をディスクに置いているため）。
+> 動作確認用です。データを残す場合は、有料プランで永続ディスクを付けます。
+> 起動のたびに、環境変数 `ADMIN_EMAIL` / `ADMIN_PASSWORD` で管理者を作り直します。
+
+**Render の画面での設定**
+1. New → Web Service で GitHub の `vlog-app` を選ぶ（Branch: `master`、Runtime: `Docker`、Instance Type: `Free`）
+2. Health Check Path に `/up` を指定する
+3. 環境変数を設定する
+
+| 変数 | 値 |
+|---|---|
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_KEY` | 手元で `php artisan key:generate --show` を実行した値（人に見せない） |
+| `APP_URL` | `https://<サービス名>.onrender.com`（サービス作成後に確定する） |
+| `SESSION_ENCRYPT` | `true` |
+| `SESSION_SECURE_COOKIE` | `true` |
+| `TRUSTED_PROXIES` | `*`（Render のプロキシを信頼する。プロキシ経由でない環境では設定しない） |
+| `LOG_CHANNEL` | `stderr`（Render のログ画面に出す） |
+| `QUEUE_CONNECTION` | `sync` |
+| `MAIL_MAILER` | `log`（この設定ではパスワードリセットのメールは送られない） |
+| `ADMIN_EMAIL` | 管理者のメールアドレス |
+| `ADMIN_PASSWORD` | 管理者のパスワード（12 文字以上を推奨。人に見せない） |
+| `ADMIN_NAME` | 管理者の表示名（省略可） |
+
+**公開後の確認**
+- `https://<サービス名>.onrender.com` を開き、`ADMIN_EMAIL` / `ADMIN_PASSWORD` でログインできる
+- `/.env` や `/database/database.sqlite` が 404 になる
+- `http://` が `https://` に転送される（Render が自動で行う）
+- ブラウザの DevTools で、Cookie に `Secure` が付いている
+
 ---
 
 ## テストと CI
