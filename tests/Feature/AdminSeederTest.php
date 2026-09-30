@@ -40,6 +40,23 @@ test('AdminSeeder promotes an existing user and does not create a duplicate', fu
     expect($existing->refresh()->is_admin)->toBeTruthy();
 });
 
+test('AdminSeeder does not overwrite the name or password of an existing admin', function () {
+    $existing = User::factory()->admin()->create([
+        'email' => 'admin@example.com',
+        'name' => 'アプリ内で変えた名前',
+        'password' => 'changed-in-the-app-1',
+    ]);
+    config(['admin.name' => '環境変数の名前', 'admin.email' => 'admin@example.com', 'admin.password' => 'from-env-password']);
+
+    $this->seed(AdminSeeder::class);
+
+    $existing->refresh();
+    expect($existing->name)->toBe('アプリ内で変えた名前');
+    expect(Hash::check('changed-in-the-app-1', $existing->password))->toBeTrue();
+    expect(Hash::check('from-env-password', $existing->password))->toBeFalse();
+    expect($existing->is_admin)->toBeTruthy();
+});
+
 test('TagSeeder can run repeatedly without creating duplicates', function () {
     $this->seed(TagSeeder::class);
     $count = Tag::count();

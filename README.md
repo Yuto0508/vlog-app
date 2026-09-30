@@ -266,14 +266,16 @@ curl -I https://あなたのドメイン/vendor/autoload.php
   php artisan config:cache && php artisan route:cache && php artisan view:cache
   ```
 
-### Render へのデプロイ（無料プラン）
+### Render へのデプロイ
 
 `Dockerfile` と `docker/` が用意してあります。Render の Web Service（Runtime: Docker）として動かせます。
 
 > **無料プランの制限:** ファイルが再デプロイ・再起動（15 分アクセスがないと停止）のたびに消えるため、
 > **投稿・ユーザー・画像はそのたびに消えます**（SQLite とアップロード画像をディスクに置いているため）。
-> 動作確認用です。データを残す場合は、有料プランで永続ディスクを付けます。
-> 起動のたびに、環境変数 `ADMIN_EMAIL` / `ADMIN_PASSWORD` で管理者を作り直します。
+> 無料プランは動作確認用です。データを残す場合は、下の「データを残す（有料プラン + 永続ディスク）」に切り替えます。
+
+管理者は、環境変数 `ADMIN_EMAIL` / `ADMIN_PASSWORD` から、起動のたびに用意されます。
+ユーザーがいなければ作成し、すでにいる場合は管理者権限を付けるだけです（名前とパスワードは上書きしません）。
 
 **Render の画面での設定**
 1. New → Web Service で GitHub の `vlog-app` を選ぶ（Branch: `master`、Runtime: `Docker`、Instance Type: `Free`）
@@ -301,6 +303,30 @@ curl -I https://あなたのドメイン/vendor/autoload.php
 - `/.env` や `/database/database.sqlite` が 404 になる
 - `http://` が `https://` に転送される（Render が自動で行う）
 - ブラウザの DevTools で、Cookie に `Secure` が付いている
+
+**データを残す（有料プラン + 永続ディスク）**
+
+SQLite のファイルとアップロード画像は、どちらも `storage/app` に置きます。ここに永続ディスクを載せると、
+再デプロイや再起動でもデータが残ります。
+
+1. Settings → Instance Type を、有料のもの（Starter 以上）に変える
+2. Settings → Disks で Disk を追加する
+   - Mount Path: `/var/www/html/storage/app`
+   - Size: `1` GB（画像が増えたら大きくできる。小さくはできない）
+3. Environment に次を追加する
+
+   | 変数 | 値 |
+   |---|---|
+   | `DB_DATABASE` | `/var/www/html/storage/app/database.sqlite` |
+
+4. 保存すると再デプロイされる。起動スクリプトが、ディスク上に SQLite と画像の保存先を用意する
+
+注意:
+- ディスクを付けると、複数台に増やせず、再デプロイのたびに短い停止が入る
+- ディスクは、ビルド中には使えない（マイグレーションは起動時に実行している）
+- **ディスクを付ける前の無料プランのデータは引き継がれない**（消えている）
+- バックアップ: ディスク上の `database.sqlite` と `public/images/` を、定期的にダウンロードする。
+  Render のディスクは、Shell（有料プラン）や Render のスナップショット機能で扱える
 
 ---
 

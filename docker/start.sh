@@ -14,6 +14,9 @@ DB_FILE="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
 mkdir -p "$(dirname "$DB_FILE")"
 touch "$DB_FILE"
 
+# アップロード画像の保存先。永続ディスクを storage/app に載せると、ビルド時に作ったフォルダは隠れるため、起動時に作る
+mkdir -p storage/app/public/images
+
 php artisan migrate --force
 # タグと(ADMIN_EMAIL / ADMIN_PASSWORD があれば)管理者を作る。何度実行しても重複しない
 php artisan db:seed --force
@@ -24,6 +27,9 @@ php artisan route:cache
 php artisan view:cache
 
 # root で作ったファイルを、Apache(www-data)が書き込めるようにする
-chown -R www-data:www-data storage bootstrap/cache "$(dirname "$DB_FILE")"
+chown -R www-data:www-data storage/framework storage/logs bootstrap/cache
+# 永続ディスクは root 所有でマウントされ、中身(画像)が増えると -R は遅くなるため、
+# ディスク側は必要なディレクトリと DB ファイルだけを対象にする(SQLite はディレクトリへの書き込みも要る)
+chown www-data:www-data storage/app storage/app/public storage/app/public/images "$(dirname "$DB_FILE")" "$DB_FILE"
 
 exec apache2-foreground
