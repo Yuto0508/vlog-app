@@ -25,7 +25,8 @@ class TagSeeder extends Seeder
         ];
 
         foreach ($tags as $tag) {
-            Tag::create(['name' => $tag]);
+            // 何度実行しても重複しないようにする
+            Tag::firstOrCreate(['name' => $tag]);
         }
         // 配列の中身を1つずつ取り出してループする
         // $tags配列の各タグ名でTag::create()を実行する
