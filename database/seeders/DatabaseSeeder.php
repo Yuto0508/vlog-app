@@ -14,9 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // TagSeederを実行する
+        // TagSeeder と AdminSeeder を実行する
         $this->call([
             TagSeeder::class,
+            AdminSeeder::class,
         ]);
     }
 }
